@@ -1,13 +1,10 @@
-import React, { useState } from 'react';
-import { MapPin, Bird, TrendingUp } from 'lucide-react';
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { MapPin, Bird, TrendingUp, AlertCircle } from 'lucide-react';
 
 // eBird API configuration
-const EBIRD_API_KEY = process.env.NEXT_PUBLIC_EBIRD_API_KEY || ''; // Set in .env.local file
 const EBIRD_API_BASE = 'https://api.ebird.org/v2';
-
-if (!EBIRD_API_KEY) {
-  console.error('eBird API key is missing. Please create a .env.local file with NEXT_PUBLIC_EBIRD_API_KEY=your_key_here');
-}
 
 const LifeListOptimizer = () => {
   const [apiKey, setApiKey] = useState(process.env.NEXT_PUBLIC_EBIRD_API_KEY || '');
@@ -44,7 +41,7 @@ const LifeListOptimizer = () => {
         }
       );
       
-      if (!response.ok) throw new Error('Failed to fetch hotspots');
+      if (!response.ok) throw new Error('Failed to fetch hotspots. Please check your API key.');
       
       const allHotspots = await response.json();
       
@@ -73,7 +70,7 @@ const LifeListOptimizer = () => {
       const response = await fetch(
         `${EBIRD_API_BASE}/data/obs/${hotspotId}/recent?back=30`,
         {
-          headers: { 'X-eBirdApiToken': EBIRD_API_KEY }
+          headers: { 'X-eBirdApiToken': apiKey }
         }
       );
       
@@ -223,30 +220,24 @@ const LifeListOptimizer = () => {
           <div className="space-y-4">
             <div className="bg-blue-50 border border-blue-200 p-4 rounded">
               <h3 className="font-semibold mb-2">Setup Instructions:</h3>
-              <ol className="list-decimal list-inside space-y-2 text-sm mb-4">
+              <ol className="list-decimal list-inside space-y-2 text-sm">
                 <li>Get an eBird API key from <a href="https://ebird.org/api/keygen" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">ebird.org/api/keygen</a></li>
                 <li>Enter your API key below</li>
-                <li>Click "Fetch Hotspots" to begin</li>
+                <li>Click &quot;Fetch Hotspots&quot; to begin</li>
               </ol>
-              
-              <div className="space-y-2">
-                <label htmlFor="apiKey" className="block text-sm font-medium text-gray-700">
-                  eBird API Key
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    id="apiKey"
-                    type="password"
-                    value={apiKey}
-                    onChange={(e) => setApiKey(e.target.value)}
-                    placeholder="Enter your eBird API key"
-                    className="flex-1 min-w-0 block w-full px-3 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                  />
-                </div>
-                <p className="text-xs text-gray-500">
-                  Your API key is stored only in your browser and never sent to any server.
-                </p>
-              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="block">
+                <span className="font-semibold">eBird API Key:</span>
+                <input
+                  type="text"
+                  value={apiKey}
+                  onChange={(e) => setApiKey(e.target.value)}
+                  placeholder="Enter your eBird API key"
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                />
+              </label>
             </div>
 
             <div className="space-y-2">
@@ -261,7 +252,7 @@ const LifeListOptimizer = () => {
 
             <button
               onClick={fetchHotspots}
-              disabled={loading}
+              disabled={loading || !apiKey}
               className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 disabled:bg-gray-400 flex items-center gap-2"
             >
               <MapPin size={20} />
@@ -278,7 +269,7 @@ const LifeListOptimizer = () => {
             </div>
 
             <div className="max-h-64 overflow-y-auto border rounded p-4">
-              {(hotspots as any[]).map((h: any) => (
+              {(hotspots as any[]).map(h => (
                 <div key={h.locId} className="text-sm py-1 border-b last:border-b-0">
                   <span className="font-medium">{h.locName}</span>
                   <span className="text-gray-500 ml-2">
@@ -341,7 +332,7 @@ const LifeListOptimizer = () => {
             </div>
 
             <div className="space-y-3">
-              {(recommendations as any[]).slice(0, 10).map((rec: any, idx: number) => (
+              {(recommendations as any[]).slice(0, 10).map((rec, idx) => (
                 <div key={rec.hotspot.locId} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
                   <div className="flex items-start justify-between mb-2">
                     <div>
