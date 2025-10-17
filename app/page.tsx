@@ -22,7 +22,7 @@ const LifeListOptimizer = () => {
     name: "Chicago West Side",
     lat: 41.94,
     lng: -87.67,
-    radius: 20 // km
+    radius: 10 // km
   };
 
   // Step 1: Fetch hotspots in the region
