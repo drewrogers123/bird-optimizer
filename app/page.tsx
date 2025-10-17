@@ -114,7 +114,7 @@ const LifeListOptimizer = () => {
         const data = await fetchHotspotSpecies(hotspot.locId);
         results[hotspot.locId] = data;
         // Small delay to respect rate limits
-        await new Promise(resolve => setTimeout(resolve, 200));
+        await new Promise(resolve => setTimeout(resolve, 6500));
       }
       
       setSpeciesData(results);
