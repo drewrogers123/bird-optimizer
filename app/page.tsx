@@ -22,7 +22,7 @@ const LifeListOptimizer = () => {
     name: "Chicago West Side",
     lat: 41.94,
     lng: -87.67,
-    radius: 10 // km
+    radius: 20 // km
   };
 
   // Step 1: Fetch hotspots in the region
@@ -35,8 +35,9 @@ const LifeListOptimizer = () => {
     setLoading(true);
     setError(null);
     try {
+      // Use geo endpoint to get hotspots within radius
       const response = await fetch(
-        `${EBIRD_API_BASE}/ref/hotspot/US-IL?fmt=json`,
+        `${EBIRD_API_BASE}/ref/hotspot/geo?lat=${CHICAGO_WEST.lat}&lng=${CHICAGO_WEST.lng}&dist=${CHICAGO_WEST.radius}&fmt=json`,
         {
           headers: { 'X-eBirdApiToken': apiKey }
         }
@@ -44,17 +45,13 @@ const LifeListOptimizer = () => {
       
       if (!response.ok) throw new Error('Failed to fetch hotspots. Please check your API key.');
       
-      const allHotspots = await response.json();
+      const hotspots = await response.json();
       
-      // Calculate distance for each hotspot and filter by radius
-      const hotspotsWithDistance = allHotspots
-        .map((h: any) => ({
-          ...h,
-          distance: calculateDistance(CHICAGO_WEST.lat, CHICAGO_WEST.lng, h.lat, h.lng)
-        }))
-        .filter((h: any) => h.distance <= CHICAGO_WEST.radius)
-        .sort((a: any, b: any) => a.distance - b.distance)
-        .slice(0, 40); // Get top 40 closest hotspots
+      // Add distance calculation for display purposes
+      const hotspotsWithDistance = hotspots.map((h: any) => ({
+        ...h,
+        distance: calculateDistance(CHICAGO_WEST.lat, CHICAGO_WEST.lng, h.lat, h.lng)
+      })).sort((a: any, b: any) => a.distance - b.distance);
       
       setHotspots(hotspotsWithDistance);
       setStage('hotspots');
